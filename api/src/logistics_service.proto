@@ -1,0 +1,14 @@
+syntax = "proto3";
+package api;
+option go_package = "github.com/ThisJohan/snapp-assignment/api";
+
+service LogisticsService {
+  rpc Todo(TodoRequest) returns (TodoResponse) {}
+}
+  
+message TodoRequest {
+}
+  
+message TodoResponse {
+}
+  

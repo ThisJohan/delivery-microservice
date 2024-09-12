@@ -1,0 +1,8 @@
+syntax = "proto3";
+package api;
+option go_package = "github.com/ThisJohan/snapp-assignment/api";
+import "logistics_service.proto";
+
+service UberService {
+  rpc Todo(api.TodoRequest) returns (api.TodoResponse) {}
+}
