@@ -2,10 +2,12 @@ package shipping
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/ThisJohan/snapp-assignment/pkg/db"
+	"github.com/ThisJohan/snapp-assignment/pkg/redisext"
 	"gorm.io/gorm"
 )
 
@@ -49,6 +51,18 @@ func (s *shipmentRepository) Create(ctx context.Context, data *Shipment) error {
 	return db.Create(data).Error
 }
 
+func (s *shipmentRepository) Get(ctx context.Context, id string) (*Shipment, error) {
+	db := db.InjectDB(ctx)
+	var shipment Shipment
+	err := db.First(&shipment, id).Error
+	return &shipment, err
+}
+
+func (s *shipmentRepository) Update(ctx context.Context, data *Shipment) error {
+	db := db.InjectDB(ctx)
+	return db.Save(data).Error
+}
+
 func (s *shipmentRepository) GetPendingShipments(ctx context.Context, timeMargin time.Duration) ([]Shipment, error) {
 	db := db.InjectDB(ctx)
 	var shipments []Shipment
@@ -64,4 +78,12 @@ func (s *shipmentRepository) GetPendingShipments(ctx context.Context, timeMargin
 
 func Migrate(db *gorm.DB) error {
 	return db.AutoMigrate(&Shipment{})
+}
+
+func queueShipment(ctx context.Context, s *Shipment) {
+	rdb := redisext.InjectRedis(ctx)
+	payload, _ := json.Marshal(s)
+	if err := rdb.Publish(ctx, "tpl_queue", payload).Err(); err != nil {
+		fmt.Printf("Failed to queue shipment: %v\n", err)
+	}
 }

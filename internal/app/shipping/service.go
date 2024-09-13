@@ -13,8 +13,6 @@ func NewService(server *grpc.Server, config Config) {
 	s := &Service{
 		logistics: api.NewLogisticsServiceClient(grpcext.NewConnection(config.TPLService)),
 	}
-	// res, err := s.logistics.Todo(context.Background(), &api.TodoRequest{})
-	// fmt.Println(res, err)
 	api.RegisterShippingServiceServer(server, s)
 }
 
@@ -39,8 +37,7 @@ func (s *Service) Create(ctx context.Context, req *api.CreateShipmentRequest) (*
 
 	if time.Until(shipment.TimeSlot) <= time.Hour {
 		// Should notify tpl immediately
-		// TODO: this should be a async job ex with redis pub/sub
-		s.logistics.Todo(ctx, &api.TodoRequest{})
+		queueShipment(ctx, shipment)
 	}
 
 	return &api.Shipment{

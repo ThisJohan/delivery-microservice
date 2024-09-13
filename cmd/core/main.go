@@ -38,7 +38,7 @@ func main() {
 		UserAddress: "test address",
 		Origin:      "test origin",
 		Destination: "test destination",
-		TimeSlot:    time.Now().Add(time.Hour * 3).Unix(),
+		TimeSlot:    time.Now().Add(time.Minute * 30).Unix(),
 	})
 	fmt.Println(x, err)
 }

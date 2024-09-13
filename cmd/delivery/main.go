@@ -10,7 +10,8 @@ import (
 	"github.com/ThisJohan/snapp-assignment/pkg/env"
 	"github.com/ThisJohan/snapp-assignment/pkg/grpcext"
 	"github.com/ThisJohan/snapp-assignment/pkg/redisext"
-	"github.com/go-redis/redis"
+	"github.com/ThisJohan/snapp-assignment/pkg/workerext"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 )
@@ -49,6 +50,19 @@ func main() {
 
 	rdb := redisext.Connect(configs.Redis)
 
+	// Worker
+	worker := shipping.NewWorker(configs.Shipping)
+	workerext.StartWorker(
+		worker,
+		di.DIBuilder(db.Service, func() *gorm.DB {
+			return database
+		}),
+		di.DIBuilder(redisext.Service, func() *redis.Client {
+			return rdb
+		}),
+	)
+
+	// GRPC Server
 	s := grpc.NewServer(
 		di.GrpcProvide(
 			di.DIBuilder(db.Service, func() *gorm.DB {

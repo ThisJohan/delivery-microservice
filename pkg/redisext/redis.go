@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ThisJohan/snapp-assignment/pkg/di"
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 )
 
 const Service = "redis"
