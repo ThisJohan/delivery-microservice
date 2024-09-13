@@ -4,6 +4,7 @@ option go_package = "github.com/ThisJohan/snapp-assignment/api";
 
 service ShippingService {
     rpc Create(CreateShipmentRequest) returns (Shipment) {}
+    rpc StatusChange(ShipmentStatusChange) returns (Void) {}
 }
 
 message CreateShipmentRequest {
@@ -14,13 +15,19 @@ message CreateShipmentRequest {
     int64 TimeSlot = 5;
 }
 
+message ShipmentStatusChange {
+    uint32 ID = 1;
+    Shipment.status Status = 2;
+}
+
 
 message Shipment {
     enum status {
-        PENDING = 0;
-        ASSIGNED = 1;
-        DELIVERED = 2;
-        CANCELED = 3;
+        QUEUED = 0;
+        PENDING = 1;
+        ASSIGNED = 2;
+        DELIVERED = 3;
+        CANCELED = 4;
     }
     uint32 ID = 1;
     string OrderID = 2;
@@ -30,3 +37,4 @@ message Shipment {
     int64 TimeSlot = 6;
     status Status = 7;
 }
+message Void {}

@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	LogisticsService_Todo_FullMethodName = "/api.LogisticsService/Todo"
+	LogisticsService_Deliver_FullMethodName = "/api.LogisticsService/Deliver"
 )
 
 // LogisticsServiceClient is the client API for LogisticsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LogisticsServiceClient interface {
-	Todo(ctx context.Context, in *TodoRequest, opts ...grpc.CallOption) (*TodoResponse, error)
+	Deliver(ctx context.Context, in *DeliverRequest, opts ...grpc.CallOption) (*DeliverResponse, error)
 }
 
 type logisticsServiceClient struct {
@@ -37,10 +37,10 @@ func NewLogisticsServiceClient(cc grpc.ClientConnInterface) LogisticsServiceClie
 	return &logisticsServiceClient{cc}
 }
 
-func (c *logisticsServiceClient) Todo(ctx context.Context, in *TodoRequest, opts ...grpc.CallOption) (*TodoResponse, error) {
+func (c *logisticsServiceClient) Deliver(ctx context.Context, in *DeliverRequest, opts ...grpc.CallOption) (*DeliverResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(TodoResponse)
-	err := c.cc.Invoke(ctx, LogisticsService_Todo_FullMethodName, in, out, cOpts...)
+	out := new(DeliverResponse)
+	err := c.cc.Invoke(ctx, LogisticsService_Deliver_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *logisticsServiceClient) Todo(ctx context.Context, in *TodoRequest, opts
 // All implementations must embed UnimplementedLogisticsServiceServer
 // for forward compatibility
 type LogisticsServiceServer interface {
-	Todo(context.Context, *TodoRequest) (*TodoResponse, error)
+	Deliver(context.Context, *DeliverRequest) (*DeliverResponse, error)
 	mustEmbedUnimplementedLogisticsServiceServer()
 }
 
@@ -59,8 +59,8 @@ type LogisticsServiceServer interface {
 type UnimplementedLogisticsServiceServer struct {
 }
 
-func (UnimplementedLogisticsServiceServer) Todo(context.Context, *TodoRequest) (*TodoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Todo not implemented")
+func (UnimplementedLogisticsServiceServer) Deliver(context.Context, *DeliverRequest) (*DeliverResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Deliver not implemented")
 }
 func (UnimplementedLogisticsServiceServer) mustEmbedUnimplementedLogisticsServiceServer() {}
 
@@ -75,20 +75,20 @@ func RegisterLogisticsServiceServer(s grpc.ServiceRegistrar, srv LogisticsServic
 	s.RegisterService(&LogisticsService_ServiceDesc, srv)
 }
 
-func _LogisticsService_Todo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TodoRequest)
+func _LogisticsService_Deliver_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeliverRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogisticsServiceServer).Todo(ctx, in)
+		return srv.(LogisticsServiceServer).Deliver(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: LogisticsService_Todo_FullMethodName,
+		FullMethod: LogisticsService_Deliver_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogisticsServiceServer).Todo(ctx, req.(*TodoRequest))
+		return srv.(LogisticsServiceServer).Deliver(ctx, req.(*DeliverRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -101,8 +101,8 @@ var LogisticsService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*LogisticsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Todo",
-			Handler:    _LogisticsService_Todo_Handler,
+			MethodName: "Deliver",
+			Handler:    _LogisticsService_Deliver_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,6 +2,7 @@ package shipping
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/ThisJohan/snapp-assignment/api"
@@ -21,6 +22,20 @@ type Service struct {
 	logistics api.LogisticsServiceClient
 }
 
+func (s *Service) StatusChange(ctx context.Context, req *api.ShipmentStatusChange) (*api.Void, error) {
+	id := strconv.FormatUint(uint64(req.ID), 10)
+	// TODO: good idea to delete shipment from redis processes
+	shipment, err := ShipmentsRepo.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	shipment.Status = req.Status.String()
+	if err := ShipmentsRepo.Update(ctx, shipment); err != nil {
+		return nil, err
+	}
+	return &api.Void{}, nil
+}
+
 func (s *Service) Create(ctx context.Context, req *api.CreateShipmentRequest) (*api.Shipment, error) {
 	shipment := &Shipment{
 		OrderID:     req.OrderID,
@@ -37,7 +52,7 @@ func (s *Service) Create(ctx context.Context, req *api.CreateShipmentRequest) (*
 
 	if time.Until(shipment.TimeSlot) <= time.Hour {
 		// Should notify tpl immediately
-		queueShipment(ctx, shipment)
+		enqueueShipment(ctx, shipment)
 	}
 
 	return &api.Shipment{

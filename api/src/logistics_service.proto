@@ -3,13 +3,13 @@ package api;
 option go_package = "github.com/ThisJohan/snapp-assignment/api";
 
 service LogisticsService {
-  rpc Todo(TodoRequest) returns (TodoResponse) {}
+  rpc Deliver(DeliverRequest) returns (DeliverResponse) {}
 }
   
-message TodoRequest {
+message DeliverRequest {
+  uint32 ShipmentID = 1;
 }
   
-message TodoResponse {
-  string Data = 1;
+message DeliverResponse {
 }
   

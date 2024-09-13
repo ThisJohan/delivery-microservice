@@ -19,7 +19,7 @@ func NewService(server *grpc.Server, config Config) {
 }
 
 type LogisticProvider interface {
-	Todo(ctx context.Context, in *api.TodoRequest, opts ...grpc.CallOption) (*api.TodoResponse, error)
+	Deliver(ctx context.Context, in *api.DeliverRequest, opts ...grpc.CallOption) (*api.DeliverResponse, error)
 }
 
 type Service struct {
@@ -27,7 +27,7 @@ type Service struct {
 	providers map[string]LogisticProvider
 }
 
-func (s *Service) Todo(ctx context.Context, req *api.TodoRequest) (*api.TodoResponse, error) {
+func (s *Service) Deliver(ctx context.Context, req *api.DeliverRequest) (*api.DeliverResponse, error) {
 	provider := s.providers["uber"]
-	return provider.Todo(ctx, req)
+	return provider.Deliver(ctx, req)
 }

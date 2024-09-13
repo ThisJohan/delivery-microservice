@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/ThisJohan/snapp-assignment/internal/app/logistics"
 	"github.com/ThisJohan/snapp-assignment/internal/app/uber"
-	"github.com/ThisJohan/snapp-assignment/pkg/di"
 	"github.com/ThisJohan/snapp-assignment/pkg/env"
 	"github.com/ThisJohan/snapp-assignment/pkg/grpcext"
 	"google.golang.org/grpc"
@@ -14,6 +12,7 @@ import (
 
 type Config struct {
 	Grpc      grpcext.Config
+	Uber      uber.Config
 	Logistics logistics.Config
 }
 
@@ -32,13 +31,9 @@ func init() {
 }
 
 func main() {
-	fmt.Println(configs)
+	s := grpc.NewServer()
 
-	s := grpc.NewServer(
-		di.GrpcProvide(di.DIBuilder("Hi", func() string { return "There" })),
-	)
-
-	uber.NewService(s)
+	uber.NewService(s, configs.Uber)
 	logistics.NewService(s, configs.Logistics)
 
 	if err := grpcext.Serve(s, configs.Grpc); err != nil {

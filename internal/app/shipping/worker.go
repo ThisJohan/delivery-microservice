@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	shipmentsStack = "pending_shipments"
+	shipmentsStack = "queued_shipments"
 )
 
 func NewWorker(config Config) *Worker {
@@ -41,13 +41,13 @@ func Cron(w *Worker) {
 
 	s.NewJob(
 		gocron.DurationJob(
-			10*time.Minute,
+			time.Minute,
 		),
 		gocron.NewTask(w.CheckPendingShipments),
 	)
 	s.NewJob(
 		gocron.DurationJob(
-			time.Minute,
+			time.Minute*5,
 		),
 		gocron.NewTask(w.CheckOnProcessShipments),
 	)
@@ -65,14 +65,17 @@ func (w *Worker) CheckOnProcessShipments() error {
 	if err != nil {
 		return err
 	}
-	// do some process on expired items
+
 	for _, item := range expiredItems {
 		shipment, _ := ShipmentsRepo.Get(w.ctx, item)
+		if shipment.Status != api.Shipment_QUEUED.String() {
+			continue
+		}
 		if now.Hour() >= 23 {
 			shipment.Status = api.Shipment_CANCELED.String()
 			ShipmentsRepo.Update(w.ctx, shipment)
 		} else {
-			queueShipment(w.ctx, shipment)
+			enqueueShipment(w.ctx, shipment)
 		}
 	}
 
@@ -87,7 +90,7 @@ func (w *Worker) CheckPendingShipments() error {
 	}
 	fmt.Println(len(shipments))
 	for _, shipment := range shipments {
-		queueShipment(w.ctx, &shipment)
+		enqueueShipment(w.ctx, &shipment)
 	}
 	return nil
 }
@@ -105,9 +108,12 @@ func Queue(w *Worker) {
 			continue
 		}
 
-		if _, err := w.logistics.Todo(w.ctx, &api.TodoRequest{}); err != nil {
+		if _, err := w.logistics.Deliver(w.ctx, &api.DeliverRequest{
+			ShipmentID: uint32(shipment.ID),
+		}); err != nil {
 			// Retry until success
-			queueShipment(w.ctx, &shipment)
+			// TODO: this could continue forever, better have some max retry count
+			enqueueShipment(w.ctx, &shipment)
 		}
 
 		expiration := time.Now().Add(time.Minute * 15).Unix()

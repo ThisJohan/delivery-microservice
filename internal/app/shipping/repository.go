@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ThisJohan/snapp-assignment/api"
 	"github.com/ThisJohan/snapp-assignment/pkg/db"
 	"github.com/ThisJohan/snapp-assignment/pkg/redisext"
 	"gorm.io/gorm"
@@ -19,8 +20,9 @@ var (
 	ShipmentsRepo = shipmentRepository{}
 )
 
-// Todo: write migration instead of auto migrate
-// CREATE TYPE shipment_status AS ENUM ('PENDING', 'ASSIGNED', 'DELIVERED', 'CANCELED');
+// TODO: write migration instead of auto migrate
+// CREATE TYPE shipment_status AS ENUM ('PENDING', 'ASSIGNED', 'DELIVERED', 'CANCELED', 'QUEUED');
+// TODO: it is a good idea to have a retry count column to track how much time it took for a 3pl to accept delivery
 
 type Shipment struct {
 	gorm.Model
@@ -66,11 +68,12 @@ func (s *shipmentRepository) Update(ctx context.Context, data *Shipment) error {
 func (s *shipmentRepository) GetPendingShipments(ctx context.Context, timeMargin time.Duration) ([]Shipment, error) {
 	db := db.InjectDB(ctx)
 	var shipments []Shipment
+	now := time.Now()
 	err := db.Where(
 		"status = ? AND time_slot > ? AND time_slot <= ?",
-		"PENDING",
-		time.Now(),
-		time.Now().Add(timeMargin),
+		api.Shipment_PENDING.String(),
+		now,
+		now.Add(timeMargin),
 	).Find(&shipments).Error
 
 	return shipments, err
@@ -80,10 +83,12 @@ func Migrate(db *gorm.DB) error {
 	return db.AutoMigrate(&Shipment{})
 }
 
-func queueShipment(ctx context.Context, s *Shipment) {
+func enqueueShipment(ctx context.Context, s *Shipment) error {
 	rdb := redisext.InjectRedis(ctx)
 	payload, _ := json.Marshal(s)
-	if err := rdb.Publish(ctx, "tpl_queue", payload).Err(); err != nil {
-		fmt.Printf("Failed to queue shipment: %v\n", err)
+	s.Status = api.Shipment_QUEUED.String()
+	if err := ShipmentsRepo.Update(ctx, s); err != nil {
+		return nil
 	}
+	return rdb.Publish(ctx, "tpl_queue", payload).Err()
 }

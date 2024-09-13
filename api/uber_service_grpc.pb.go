@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	UberService_Todo_FullMethodName = "/api.UberService/Todo"
+	UberService_Deliver_FullMethodName = "/api.UberService/Deliver"
 )
 
 // UberServiceClient is the client API for UberService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UberServiceClient interface {
-	Todo(ctx context.Context, in *TodoRequest, opts ...grpc.CallOption) (*TodoResponse, error)
+	Deliver(ctx context.Context, in *DeliverRequest, opts ...grpc.CallOption) (*DeliverResponse, error)
 }
 
 type uberServiceClient struct {
@@ -37,10 +37,10 @@ func NewUberServiceClient(cc grpc.ClientConnInterface) UberServiceClient {
 	return &uberServiceClient{cc}
 }
 
-func (c *uberServiceClient) Todo(ctx context.Context, in *TodoRequest, opts ...grpc.CallOption) (*TodoResponse, error) {
+func (c *uberServiceClient) Deliver(ctx context.Context, in *DeliverRequest, opts ...grpc.CallOption) (*DeliverResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(TodoResponse)
-	err := c.cc.Invoke(ctx, UberService_Todo_FullMethodName, in, out, cOpts...)
+	out := new(DeliverResponse)
+	err := c.cc.Invoke(ctx, UberService_Deliver_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *uberServiceClient) Todo(ctx context.Context, in *TodoRequest, opts ...g
 // All implementations must embed UnimplementedUberServiceServer
 // for forward compatibility
 type UberServiceServer interface {
-	Todo(context.Context, *TodoRequest) (*TodoResponse, error)
+	Deliver(context.Context, *DeliverRequest) (*DeliverResponse, error)
 	mustEmbedUnimplementedUberServiceServer()
 }
 
@@ -59,8 +59,8 @@ type UberServiceServer interface {
 type UnimplementedUberServiceServer struct {
 }
 
-func (UnimplementedUberServiceServer) Todo(context.Context, *TodoRequest) (*TodoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Todo not implemented")
+func (UnimplementedUberServiceServer) Deliver(context.Context, *DeliverRequest) (*DeliverResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Deliver not implemented")
 }
 func (UnimplementedUberServiceServer) mustEmbedUnimplementedUberServiceServer() {}
 
@@ -75,20 +75,20 @@ func RegisterUberServiceServer(s grpc.ServiceRegistrar, srv UberServiceServer) {
 	s.RegisterService(&UberService_ServiceDesc, srv)
 }
 
-func _UberService_Todo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TodoRequest)
+func _UberService_Deliver_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeliverRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UberServiceServer).Todo(ctx, in)
+		return srv.(UberServiceServer).Deliver(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UberService_Todo_FullMethodName,
+		FullMethod: UberService_Deliver_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UberServiceServer).Todo(ctx, req.(*TodoRequest))
+		return srv.(UberServiceServer).Deliver(ctx, req.(*DeliverRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -101,8 +101,8 @@ var UberService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UberServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Todo",
-			Handler:    _UberService_Todo_Handler,
+			MethodName: "Deliver",
+			Handler:    _UberService_Deliver_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

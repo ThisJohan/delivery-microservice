@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/ThisJohan/snapp-assignment/internal/app/shipping"
@@ -38,8 +37,6 @@ func init() {
 }
 
 func main() {
-	fmt.Println(configs)
-
 	database, err := db.OpenDBConnection(configs.Database)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
