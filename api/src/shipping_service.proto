@@ -3,4 +3,30 @@ package api;
 option go_package = "github.com/ThisJohan/snapp-assignment/api";
 
 service ShippingService {
+    rpc Create(CreateShipmentRequest) returns (Shipment) {}
+}
+
+message CreateShipmentRequest {
+    string OrderID = 1;
+    string UserAddress = 2;
+    string Origin = 3;
+    string Destination = 4;
+    int64 TimeSlot = 5;
+}
+
+
+message Shipment {
+    enum status {
+        PENDING = 0;
+        ASSIGNED = 1;
+        DELIVERED = 2;
+        CANCELED = 3;
+    }
+    uint32 ID = 1;
+    string OrderID = 2;
+    string UserAddress = 3;
+    string Origin = 4;
+    string Destination = 5;
+    int64 TimeSlot = 6;
+    status Status = 7;
 }

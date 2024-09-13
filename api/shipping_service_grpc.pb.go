@@ -7,7 +7,10 @@
 package api
 
 import (
+	context "context"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -15,10 +18,15 @@ import (
 // Requires gRPC-Go v1.62.0 or later.
 const _ = grpc.SupportPackageIsVersion8
 
+const (
+	ShippingService_Create_FullMethodName = "/api.ShippingService/Create"
+)
+
 // ShippingServiceClient is the client API for ShippingService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShippingServiceClient interface {
+	Create(ctx context.Context, in *CreateShipmentRequest, opts ...grpc.CallOption) (*Shipment, error)
 }
 
 type shippingServiceClient struct {
@@ -29,10 +37,21 @@ func NewShippingServiceClient(cc grpc.ClientConnInterface) ShippingServiceClient
 	return &shippingServiceClient{cc}
 }
 
+func (c *shippingServiceClient) Create(ctx context.Context, in *CreateShipmentRequest, opts ...grpc.CallOption) (*Shipment, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Shipment)
+	err := c.cc.Invoke(ctx, ShippingService_Create_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ShippingServiceServer is the server API for ShippingService service.
 // All implementations must embed UnimplementedShippingServiceServer
 // for forward compatibility
 type ShippingServiceServer interface {
+	Create(context.Context, *CreateShipmentRequest) (*Shipment, error)
 	mustEmbedUnimplementedShippingServiceServer()
 }
 
@@ -40,6 +59,9 @@ type ShippingServiceServer interface {
 type UnimplementedShippingServiceServer struct {
 }
 
+func (UnimplementedShippingServiceServer) Create(context.Context, *CreateShipmentRequest) (*Shipment, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
 func (UnimplementedShippingServiceServer) mustEmbedUnimplementedShippingServiceServer() {}
 
 // UnsafeShippingServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -53,13 +75,36 @@ func RegisterShippingServiceServer(s grpc.ServiceRegistrar, srv ShippingServiceS
 	s.RegisterService(&ShippingService_ServiceDesc, srv)
 }
 
+func _ShippingService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateShipmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShippingServiceServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ShippingService_Create_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShippingServiceServer).Create(ctx, req.(*CreateShipmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ShippingService_ServiceDesc is the grpc.ServiceDesc for ShippingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ShippingService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "api.ShippingService",
 	HandlerType: (*ShippingServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "shipping_service.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Create",
+			Handler:    _ShippingService_Create_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "shipping_service.proto",
 }
