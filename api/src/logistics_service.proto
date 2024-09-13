@@ -10,5 +10,6 @@ message TodoRequest {
 }
   
 message TodoResponse {
+  string Data = 1;
 }
   

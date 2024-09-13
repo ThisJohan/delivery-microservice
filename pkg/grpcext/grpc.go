@@ -33,7 +33,10 @@ func NewInternalConnection(configs Config) grpc.ClientConnInterface {
 }
 
 func NewConnection(addr string) grpc.ClientConnInterface {
-	conn, err := grpc.NewClient(addr)
+	conn, err := grpc.NewClient(
+		addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		panic(err)
 	}

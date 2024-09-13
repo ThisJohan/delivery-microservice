@@ -18,7 +18,7 @@ type Config struct {
 }
 
 const (
-	service = "3pl"
+	service = "tpl"
 )
 
 var (
@@ -34,10 +34,6 @@ func init() {
 func main() {
 	fmt.Println(configs)
 
-	runGrpcServer()
-}
-
-func runGrpcServer() {
 	s := grpc.NewServer(
 		di.GrpcProvide("Hi", "There"),
 	)
