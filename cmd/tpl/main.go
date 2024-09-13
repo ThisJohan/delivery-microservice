@@ -35,7 +35,7 @@ func main() {
 	fmt.Println(configs)
 
 	s := grpc.NewServer(
-		di.GrpcProvide("Hi", "There"),
+		di.GrpcProvide(di.DIBuilder("Hi", func() string { return "There" })),
 	)
 
 	uber.NewService(s)

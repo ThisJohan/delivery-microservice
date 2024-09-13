@@ -9,13 +9,15 @@ import (
 
 type diKey string
 
-func GrpcProvide(key string, value any) grpc.ServerOption {
+func GrpcProvide(builders ...Builder) grpc.ServerOption {
 	return grpc.UnaryInterceptor(func(
 		ctx context.Context,
 		req any,
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (resp any, err error) {
-		ctx = FromContext(ctx, key, value)
+		for _, builder := range builders {
+			ctx = builder(ctx)
+		}
 		return handler(ctx, req)
 	})
 }
@@ -30,4 +32,13 @@ func Inject[T any](ctx context.Context, key string) T {
 		log.Fatalf("DI: Failed to get value from context with key: %s", key)
 	}
 	return value
+}
+
+type Builder func(context.Context) context.Context
+
+func DIBuilder[T any](key string, provide func() T) Builder {
+	value := provide()
+	return func(ctx context.Context) context.Context {
+		return FromContext(ctx, key, value)
+	}
 }

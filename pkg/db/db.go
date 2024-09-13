@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const Service = "db"
+
 type Config struct {
 	Host     string `env:"POSTGRES_HOST" envDefault:"localhost"`
 	Port     int    `env:"POSTGRES_PORT" envDefault:"5432"`
@@ -31,5 +33,5 @@ func OpenDBConnection(c Config) (*gorm.DB, error) {
 }
 
 func InjectDB(ctx context.Context) *gorm.DB {
-	return di.Inject[*gorm.DB](ctx, "db")
+	return di.Inject[*gorm.DB](ctx, Service)
 }

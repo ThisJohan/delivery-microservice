@@ -9,13 +9,17 @@ import (
 	"github.com/ThisJohan/snapp-assignment/pkg/di"
 	"github.com/ThisJohan/snapp-assignment/pkg/env"
 	"github.com/ThisJohan/snapp-assignment/pkg/grpcext"
+	"github.com/ThisJohan/snapp-assignment/pkg/redisext"
+	"github.com/go-redis/redis"
 	"google.golang.org/grpc"
+	"gorm.io/gorm"
 )
 
 type Config struct {
 	Grpc     grpcext.Config
 	Shipping shipping.Config
 	Database db.Config
+	Redis    redisext.Config
 }
 
 const (
@@ -43,8 +47,17 @@ func main() {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
+	rdb := redisext.Connect(configs.Redis)
+
 	s := grpc.NewServer(
-		di.GrpcProvide("db", database),
+		di.GrpcProvide(
+			di.DIBuilder(db.Service, func() *gorm.DB {
+				return database
+			}),
+			di.DIBuilder(redisext.Service, func() *redis.Client {
+				return rdb
+			}),
+		),
 	)
 
 	shipping.NewService(s, configs.Shipping)
