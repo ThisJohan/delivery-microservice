@@ -1,6 +1,6 @@
 syntax = "proto3";
 package api;
-option go_package = "github.com/ThisJohan/snapp-assignment/api";
+option go_package = "github.com/ThisJohan/delivery-microservice/api";
 
 service LogisticsService {
   rpc Deliver(DeliverRequest) returns (DeliverResponse) {}

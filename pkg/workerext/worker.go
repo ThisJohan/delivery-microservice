@@ -3,7 +3,7 @@ package workerext
 import (
 	"context"
 
-	"github.com/ThisJohan/snapp-assignment/pkg/di"
+	"github.com/ThisJohan/delivery-microservice/pkg/di"
 )
 
 type worker interface {

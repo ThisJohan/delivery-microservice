@@ -1,4 +1,4 @@
-module github.com/ThisJohan/snapp-assignment
+module github.com/ThisJohan/delivery-microservice
 
 go 1.22.5
 

@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/ThisJohan/snapp-assignment/api"
-	"github.com/ThisJohan/snapp-assignment/pkg/env"
-	"github.com/ThisJohan/snapp-assignment/pkg/grpcext"
+	"github.com/ThisJohan/delivery-microservice/api"
+	"github.com/ThisJohan/delivery-microservice/pkg/env"
+	"github.com/ThisJohan/delivery-microservice/pkg/grpcext"
 )
 
 const (

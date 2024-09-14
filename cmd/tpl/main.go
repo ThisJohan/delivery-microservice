@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
-	"github.com/ThisJohan/snapp-assignment/internal/app/logistics"
-	"github.com/ThisJohan/snapp-assignment/internal/app/uber"
-	"github.com/ThisJohan/snapp-assignment/pkg/env"
-	"github.com/ThisJohan/snapp-assignment/pkg/grpcext"
+	"github.com/ThisJohan/delivery-microservice/internal/app/logistics"
+	"github.com/ThisJohan/delivery-microservice/internal/app/uber"
+	"github.com/ThisJohan/delivery-microservice/pkg/env"
+	"github.com/ThisJohan/delivery-microservice/pkg/grpcext"
 	"google.golang.org/grpc"
 )
 

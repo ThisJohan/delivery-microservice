@@ -1,6 +1,6 @@
 package logistics
 
-import "github.com/ThisJohan/snapp-assignment/pkg/grpcext"
+import "github.com/ThisJohan/delivery-microservice/pkg/grpcext"
 
 type Config struct {
 	Grpc grpcext.Config

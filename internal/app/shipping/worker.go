@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ThisJohan/snapp-assignment/api"
-	"github.com/ThisJohan/snapp-assignment/pkg/grpcext"
-	"github.com/ThisJohan/snapp-assignment/pkg/redisext"
+	"github.com/ThisJohan/delivery-microservice/api"
+	"github.com/ThisJohan/delivery-microservice/pkg/grpcext"
+	"github.com/ThisJohan/delivery-microservice/pkg/redisext"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/redis/go-redis/v9"
 )
@@ -41,13 +41,13 @@ func Cron(w *Worker) {
 
 	s.NewJob(
 		gocron.DurationJob(
-			time.Minute,
+			time.Second*15,
 		),
 		gocron.NewTask(w.CheckPendingShipments),
 	)
 	s.NewJob(
 		gocron.DurationJob(
-			time.Minute*5,
+			time.Second*10,
 		),
 		gocron.NewTask(w.CheckOnProcessShipments),
 	)
@@ -65,6 +65,8 @@ func (w *Worker) CheckOnProcessShipments() error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Found %d expired shipments\n", len(expiredItems))
 
 	for _, item := range expiredItems {
 		shipment, _ := ShipmentsRepo.Get(w.ctx, item)
@@ -88,9 +90,12 @@ func (w *Worker) CheckPendingShipments() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(len(shipments))
+	fmt.Printf("Found %d pending shipments\n", len(shipments))
 	for _, shipment := range shipments {
-		enqueueShipment(w.ctx, &shipment)
+		if err := enqueueShipment(w.ctx, &shipment); err != nil {
+			fmt.Printf("Failed to enqueue shipment: %v\n", err)
+		}
+		
 	}
 	return nil
 }
@@ -116,7 +121,7 @@ func Queue(w *Worker) {
 			enqueueShipment(w.ctx, &shipment)
 		}
 
-		expiration := time.Now().Add(time.Minute * 15).Unix()
+		expiration := time.Now().Add(time.Second * 15).Unix()
 		rdb.ZAdd(w.ctx, shipmentsStack, redis.Z{
 			Score:  float64(expiration),
 			Member: shipment.ID,

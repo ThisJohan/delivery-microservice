@@ -2,10 +2,9 @@ package uber
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/ThisJohan/snapp-assignment/api"
-	"github.com/ThisJohan/snapp-assignment/pkg/grpcext"
+	"github.com/ThisJohan/delivery-microservice/api"
+	"github.com/ThisJohan/delivery-microservice/pkg/grpcext"
 	"google.golang.org/grpc"
 )
 
@@ -23,10 +22,8 @@ type Service struct {
 
 // Deliver implements api.UberServiceServer.
 func (s *Service) Deliver(ctx context.Context, req *api.DeliverRequest) (*api.DeliverResponse, error) {
-	fmt.Println("Here")
 	if req.ShipmentID%2 == 0 {
-		fmt.Println("Here2")
-		_, _ = s.shippingService.StatusChange(ctx, &api.ShipmentStatusChange{
+		s.shippingService.StatusChange(ctx, &api.ShipmentStatusChange{
 			ID:     req.ShipmentID,
 			Status: api.Shipment_ASSIGNED,
 		})

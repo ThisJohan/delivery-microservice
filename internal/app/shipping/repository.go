@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ThisJohan/snapp-assignment/api"
-	"github.com/ThisJohan/snapp-assignment/pkg/db"
-	"github.com/ThisJohan/snapp-assignment/pkg/redisext"
+	"github.com/ThisJohan/delivery-microservice/api"
+	"github.com/ThisJohan/delivery-microservice/pkg/db"
+	"github.com/ThisJohan/delivery-microservice/pkg/redisext"
 	"gorm.io/gorm"
 )
 
@@ -84,11 +84,16 @@ func Migrate(db *gorm.DB) error {
 }
 
 func enqueueShipment(ctx context.Context, s *Shipment) error {
-	rdb := redisext.InjectRedis(ctx)
-	payload, _ := json.Marshal(s)
-	s.Status = api.Shipment_QUEUED.String()
-	if err := ShipmentsRepo.Update(ctx, s); err != nil {
+	return db.InjectDB(ctx).Transaction(func(tx *gorm.DB) error {
+		s.Status = api.Shipment_QUEUED.String()
+		if err := tx.Save(s).Error; err != nil {
+			return err
+		}
+		rdb := redisext.InjectRedis(ctx)
+		payload, _ := json.Marshal(s)
+		if err := rdb.Publish(ctx, "tpl_queue", payload).Err(); err != nil {
+			return err
+		}
 		return nil
-	}
-	return rdb.Publish(ctx, "tpl_queue", payload).Err()
+	})
 }

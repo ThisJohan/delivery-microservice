@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ThisJohan/snapp-assignment/pkg/di"
+	"github.com/ThisJohan/delivery-microservice/pkg/di"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,7 +17,7 @@ type Config struct {
 	User     string `env:"POSTGRES_USER" envDefault:"postgres"`
 	Password string `env:"POSTGRES_PASSWORD" envDefault:"postgres"`
 	DBName   string `env:"POSTGRES_DB" envDefault:"postgres"`
-	SSLMode  string `env:"POSTGRES_DB" envDefault:"disable"`
+	SSLMode  string `env:"POSTGRES_SSLMODE" envDefault:"disable"`
 }
 
 func (c *Config) dsn() string {

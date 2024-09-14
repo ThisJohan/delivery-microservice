@@ -3,8 +3,8 @@ package logistics
 import (
 	"context"
 
-	"github.com/ThisJohan/snapp-assignment/api"
-	"github.com/ThisJohan/snapp-assignment/pkg/grpcext"
+	"github.com/ThisJohan/delivery-microservice/api"
+	"github.com/ThisJohan/delivery-microservice/pkg/grpcext"
 	"google.golang.org/grpc"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ThisJohan/snapp-assignment/pkg/di"
+	"github.com/ThisJohan/delivery-microservice/pkg/di"
 	"github.com/redis/go-redis/v9"
 )
 
