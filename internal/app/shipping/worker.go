@@ -41,13 +41,13 @@ func Cron(w *Worker) {
 
 	s.NewJob(
 		gocron.DurationJob(
-			time.Second*15,
+			time.Minute*5,
 		),
 		gocron.NewTask(w.CheckPendingShipments),
 	)
 	s.NewJob(
 		gocron.DurationJob(
-			time.Second*10,
+			time.Minute,
 		),
 		gocron.NewTask(w.CheckOnProcessShipments),
 	)
@@ -121,7 +121,7 @@ func Queue(w *Worker) {
 			enqueueShipment(w.ctx, &shipment)
 		}
 
-		expiration := time.Now().Add(time.Second * 15).Unix()
+		expiration := time.Now().Add(time.Minute * 15).Unix()
 		rdb.ZAdd(w.ctx, shipmentsStack, redis.Z{
 			Score:  float64(expiration),
 			Member: shipment.ID,
