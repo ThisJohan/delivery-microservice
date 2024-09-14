@@ -22,11 +22,15 @@ type Service struct {
 
 // Deliver implements api.UberServiceServer.
 func (s *Service) Deliver(ctx context.Context, req *api.DeliverRequest) (*api.DeliverResponse, error) {
+	model := &api.ShipmentStatusChange{
+		ID:     req.ShipmentID,
+		Status: api.Shipment_ASSIGNED,
+	}
 	if req.ShipmentID%2 == 0 {
-		s.shippingService.StatusChange(ctx, &api.ShipmentStatusChange{
-			ID:     req.ShipmentID,
-			Status: api.Shipment_ASSIGNED,
-		})
+		if req.ShipmentID%3 == 0 {
+			model.Status = api.Shipment_DELIVERED
+		}
+		s.shippingService.StatusChange(ctx, model)
 	}
 
 	return nil, nil

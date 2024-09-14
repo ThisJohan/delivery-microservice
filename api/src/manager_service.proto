@@ -1,0 +1,12 @@
+syntax = "proto3";
+package api;
+option go_package = "github.com/ThisJohan/delivery-microservice/api";
+import "shipping_service.proto";
+
+service ManagerService {
+  rpc UpdateShipment(UpdateShipmentRequest) returns (api.Void) {}
+}
+
+message UpdateShipmentRequest {
+    api.Shipment Shipment = 1;
+}

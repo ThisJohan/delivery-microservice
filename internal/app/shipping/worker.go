@@ -95,7 +95,7 @@ func (w *Worker) CheckPendingShipments() error {
 		if err := enqueueShipment(w.ctx, &shipment); err != nil {
 			fmt.Printf("Failed to enqueue shipment: %v\n", err)
 		}
-		
+
 	}
 	return nil
 }

@@ -2,6 +2,7 @@ package shipping
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 func NewService(server *grpc.Server, config Config) {
 	s := &Service{
 		logistics: api.NewLogisticsServiceClient(grpcext.NewConnection(config.TPLService)),
+		manager:   api.NewManagerServiceClient(grpcext.NewConnection(config.ManagerService)),
 	}
 	api.RegisterShippingServiceServer(server, s)
 }
@@ -20,6 +22,7 @@ func NewService(server *grpc.Server, config Config) {
 type Service struct {
 	api.UnimplementedShippingServiceServer
 	logistics api.LogisticsServiceClient
+	manager   api.ManagerServiceClient
 }
 
 func (s *Service) StatusChange(ctx context.Context, req *api.ShipmentStatusChange) (*api.Void, error) {
@@ -32,6 +35,13 @@ func (s *Service) StatusChange(ctx context.Context, req *api.ShipmentStatusChang
 	shipment.Status = req.Status.String()
 	if err := ShipmentsRepo.Update(ctx, shipment); err != nil {
 		return nil, err
+	}
+	_, err = s.manager.UpdateShipment(ctx, &api.UpdateShipmentRequest{
+		Shipment: convertShipment(shipment),
+	})
+	if err != nil {
+		// we need a retry queue for this error, but redis is pain in the ass, so we can't do that
+		fmt.Printf("Failed to notify manager the shipment: %v\n", err)
 	}
 	return &api.Void{}, nil
 }
@@ -55,6 +65,10 @@ func (s *Service) Create(ctx context.Context, req *api.CreateShipmentRequest) (*
 		enqueueShipment(ctx, shipment)
 	}
 
+	return convertShipment(shipment), nil
+}
+
+func convertShipment(shipment *Shipment) *api.Shipment {
 	return &api.Shipment{
 		ID:          uint32(shipment.ID),
 		OrderID:     shipment.OrderID,
@@ -63,5 +77,5 @@ func (s *Service) Create(ctx context.Context, req *api.CreateShipmentRequest) (*
 		Destination: shipment.Destination,
 		TimeSlot:    shipment.TimeSlot.Unix(),
 		Status:      api.ShipmentStatus(api.ShipmentStatus_value[shipment.Status]),
-	}, nil
+	}
 }

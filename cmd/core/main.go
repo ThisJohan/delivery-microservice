@@ -1,14 +1,13 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"time"
 
-	"github.com/ThisJohan/delivery-microservice/api"
+	"github.com/ThisJohan/delivery-microservice/internal/app/manager"
 	"github.com/ThisJohan/delivery-microservice/pkg/env"
 	"github.com/ThisJohan/delivery-microservice/pkg/grpcext"
+	"github.com/ThisJohan/delivery-microservice/pkg/workerext"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -16,8 +15,8 @@ const (
 )
 
 type Config struct {
-	Grpc            grpcext.Config
-	DeliveryService string `env:"DELIVERY_SERVICE" envDefault:"delivery:6565"`
+	Grpc    grpcext.Config
+	Manager manager.Config
 }
 
 var (
@@ -31,14 +30,18 @@ func init() {
 }
 
 func main() {
-	shipping := api.NewShippingServiceClient(grpcext.NewConnection(configs.DeliveryService))
+	// Worker
+	worker := manager.NewWorker(configs.Manager)
+	workerext.StartWorker(
+		worker,
+	)
 
-	x, err := shipping.Create(context.Background(), &api.CreateShipmentRequest{
-		OrderID:     "test_id",
-		UserAddress: "test address",
-		Origin:      "test origin",
-		Destination: "test destination",
-		TimeSlot:    time.Now().Add(time.Minute * 61).Unix(),
-	})
-	fmt.Println(x, err)
+	// GRPC Server
+	s := grpc.NewServer()
+
+	manager.NewService(s)
+
+	if err := grpcext.Serve(s, configs.Grpc); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
+	}
 }
