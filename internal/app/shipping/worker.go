@@ -57,6 +57,7 @@ func Cron(w *Worker) {
 }
 
 func (w *Worker) CheckOnProcessShipments() error {
+	defer handlePanic()
 	rdb := redisext.InjectRedis(w.ctx)
 	now := time.Now()
 	expiredItems, err := rdb.ZRangeByScore(w.ctx, shipmentsStack, &redis.ZRangeBy{
@@ -86,6 +87,7 @@ func (w *Worker) CheckOnProcessShipments() error {
 }
 
 func (w *Worker) CheckPendingShipments() error {
+	defer handlePanic()
 	shipments, err := ShipmentsRepo.GetPendingShipments(w.ctx, time.Hour)
 	if err != nil {
 		return err
@@ -101,6 +103,7 @@ func (w *Worker) CheckPendingShipments() error {
 }
 
 func Queue(w *Worker) {
+	defer handlePanic()
 	rdb := redisext.InjectRedis(w.ctx)
 	pubsub := rdb.Subscribe(w.ctx, "tpl_queue")
 	ch := pubsub.Channel()
@@ -126,5 +129,11 @@ func Queue(w *Worker) {
 			Score:  float64(expiration),
 			Member: shipment.ID,
 		})
+	}
+}
+
+func handlePanic() {
+	if err := recover(); err != nil {
+		fmt.Printf("Failed to recover: %v", err)
 	}
 }
